@@ -72,9 +72,13 @@ export const projects = [
       ['다중 인스턴스 WebRTC 분산 처리', 'WebRTC/Kurento 미디어 세션이 같은 방 참여자를 동일 인스턴스에서 처리하도록 Consistent Hashing + Redis room mapping·sticky session으로 라우팅, Kafka·SSE로 인스턴스 간 방 이벤트를 전파.'],
       ['Redis 런타임 상태 저장소', '방 상태·라우팅 매핑·인스턴스 heartbeat·sticky cookie·세션 관리.'],
       ['통신 방식 책임 분리', 'HTTP · WebSocket · SSE · WebRTC DataChannel · Kurento로 역할 분리.'],
+      ['CatchMind 실시간 드로잉 게임', 'WebRTC DataChannel로 한 사용자가 그리는 그림을 다른 참여자 화면에 실시간 전송. 출제 주제는 Python AI 서버로 생성(장애 시 기본 주제 fallback)하는 등 Python·AI 연동을 직접 구현.'],
       ['운영 / 배포', 'Docker·K8s(EKS), GitHub Actions CI/CD, 예외 표준화(ErrorCode·TraceId), MinIO·Electron.'],
     ],
-    trouble: ['장기 WebSocket 연결 timeout 장애', 'Ingress/controller 계층만으로는 불안정하던 장기 연결을, 장애를 문서화·추적해 nginx sidecar + WebSocket timeout 정책으로 안정화.'],
+    troubles: [
+      ['장기 WebSocket 연결 timeout 장애', 'Ingress/controller 계층만으로는 불안정하던 장기 연결을, 장애를 문서화·추적해 nginx sidecar + WebSocket timeout 정책으로 안정화.'],
+      ['CatchMind 정답 인식 개선 (음성 → 음성+채팅)', '기존엔 음성으로만 정답을 맞출 수 있었으나, 음성 인식 정확도를 프론트·백엔드 양쪽에서 개선하고 Komoran 형태소 분석 기반 정답 힌트를 추가. 음성 인식 실패 시 채팅으로도 정답 입력이 가능하도록 보완.'],
+    ],
     stack: ['Spring Boot', 'WebRTC', 'Kurento', 'Redis', 'Kafka', 'MinIO', 'K8s(EKS)', 'Docker'],
   },
   {
@@ -85,7 +89,7 @@ export const projects = [
     repo: '',
     desc: 'Spring Boot + JPA 매출 관리 + Python Flask/Pandas 분석·시각화. 50만 건+ 데이터 분석·매출 예측, Docker 기반 서비스 스택.',
     feats: [],
-    trouble: null,
+    troubles: [],
     stack: ['Spring Boot', 'JPA', 'Python', 'Flask', 'Pandas', 'Docker'],
   },
 ]

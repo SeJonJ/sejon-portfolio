@@ -300,11 +300,17 @@ function ProjectCard({ p, idx }) {
           </div>
         )}
 
-        {p.trouble && (
+        {p.troubles?.length > 0 && (
           <div className="mt-5 rounded-lg border border-line bg-surface2/70 p-4">
             <div className="font-mono text-xs font-bold tracking-wide text-amber">🔧 TROUBLESHOOTING</div>
-            <div className="mt-1.5 text-sm font-semibold text-slate-200">{p.trouble[0]}</div>
-            <p className="mt-0.5 text-sm leading-relaxed text-muted">{p.trouble[1]}</p>
+            <div className="mt-3 flex flex-col gap-3">
+              {p.troubles.map(([t, d]) => (
+                <div key={t}>
+                  <div className="text-sm font-semibold text-slate-200">{t}</div>
+                  <p className="mt-0.5 text-sm leading-relaxed text-muted">{d}</p>
+                </div>
+              ))}
+            </div>
           </div>
         )}
 
