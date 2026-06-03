@@ -1,0 +1,32 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+html {
+  scroll-behavior: smooth;
+}
+body {
+  @apply bg-bg text-slate-200 font-sans antialiased;
+}
+::selection {
+  background: rgba(74, 222, 128, 0.25);
+}
+
+/* subtle dotted grid background */
+.bg-grid {
+  background-image: radial-gradient(rgba(86, 212, 221, 0.06) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* glow accent for terminal */
+.text-glow {
+  text-shadow: 0 0 14px rgba(74, 222, 128, 0.35);
+}
+
+/* thin scrollbar hidden where needed */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
