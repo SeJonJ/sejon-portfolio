@@ -30,3 +30,24 @@ body {
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
+
+/* offset for sticky nav when scrolling to a section */
+section[id] {
+  scroll-margin-top: 72px;
+}
+
+/* flash highlight when a terminal command jumps to a section */
+.section-flash {
+  animation: secflash 1.5s ease-out;
+}
+@keyframes secflash {
+  0% {
+    background-color: rgba(74, 222, 128, 0);
+  }
+  18% {
+    background-color: rgba(74, 222, 128, 0.08);
+  }
+  100% {
+    background-color: rgba(74, 222, 128, 0);
+  }
+}

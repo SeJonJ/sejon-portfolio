@@ -63,7 +63,7 @@ const NAV = [
   ['projects', 'projects'],
   ['education', 'edu'],
 ]
-function Nav() {
+function Nav({ onReveal }) {
   return (
     <nav className="sticky top-0 z-50 border-b border-line bg-bg/80 backdrop-blur">
       <div className="mx-auto flex max-w-5xl items-center justify-between px-5 py-3">
@@ -75,6 +75,10 @@ function Nav() {
             <li key={id}>
               <a
                 href={`#${id}`}
+                onClick={(e) => {
+                  e.preventDefault()
+                  onReveal(id)
+                }}
                 className="rounded-md px-3 py-1.5 text-muted transition hover:bg-surface hover:text-term"
               >
                 {label}
@@ -98,7 +102,169 @@ const Heading = ({ cmd, children }) => (
 )
 
 /* ── hero ────────────────────────────────────────────── */
-function Hero() {
+/* ── interactive terminal ────────────────────────────── */
+const SECTION_IDS = ['about', 'skills', 'experience', 'projects', 'education']
+const COMMANDS = [
+  { cmd: 'help', desc: '명령어 목록 보기' },
+  { cmd: 'cat about/strengths.md', alias: ['about'], desc: '핵심 역량', section: 'about' },
+  { cmd: 'skills --list', alias: ['skills'], desc: '보유 기술', section: 'skills' },
+  { cmd: 'git log', alias: ['experience', 'work'], desc: '경력', section: 'experience' },
+  { cmd: 'ls projects/', alias: ['projects', 'ls'], desc: '프로젝트', section: 'projects' },
+  { cmd: 'cat education.txt', alias: ['education', 'edu'], desc: '학력·자격', section: 'education' },
+  { cmd: 'cat resume.md', alias: ['all', 'resume', 'open'], desc: '전체 보기', all: true },
+  { cmd: 'contact', desc: '연락처 출력', out: ['wkdtpwhs@gmail.com', 'wkdtpwhs@naver.com', 'github.com/SeJonJ'] },
+  { cmd: 'clear', desc: '터미널 지우기' },
+]
+const CHIPS = ['help', 'cat about/strengths.md', 'skills --list', 'git log', 'ls projects/', 'cat education.txt', 'cat resume.md']
+
+function flashSection(id) {
+  const el = document.getElementById(id)
+  if (!el) return
+  el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  el.classList.remove('section-flash')
+  void el.offsetWidth // force reflow so the animation can replay
+  el.classList.add('section-flash')
+  setTimeout(() => el.classList.remove('section-flash'), 1500)
+}
+
+function resolveCommand(raw) {
+  const q = raw.trim().toLowerCase()
+  if (!q) return null
+  return (
+    COMMANDS.find((c) => c.cmd.toLowerCase() === q) ||
+    COMMANDS.find((c) => (c.alias || []).includes(q)) ||
+    null
+  )
+}
+
+function Terminal({ onReveal, onRevealAll }) {
+  const [log, setLog] = useState([])
+  const [input, setInput] = useState('')
+  const [history, setHistory] = useState([])
+  const [hIdx, setHIdx] = useState(-1)
+  const inputRef = useRef(null)
+  const bodyRef = useRef(null)
+
+  useEffect(() => {
+    if (bodyRef.current) bodyRef.current.scrollTop = bodyRef.current.scrollHeight
+  }, [log])
+
+  const print = (prompt, lines) => setLog((l) => [...l, { prompt, lines }])
+
+  const run = (raw) => {
+    const cmd = raw.trim()
+    if (!cmd) return
+    setHistory((h) => [...h, cmd])
+    setHIdx(-1)
+    if (cmd.toLowerCase() === 'clear') {
+      setLog([])
+      return
+    }
+    const c = resolveCommand(cmd)
+    if (!c) {
+      print(cmd, [
+        { t: `command not found: ${cmd}`, cls: 'text-rose-400' },
+        { t: "'help' 를 입력하면 사용 가능한 명령어를 볼 수 있어요.", cls: 'text-faint' },
+      ])
+      return
+    }
+    if (c.cmd === 'help') {
+      print(cmd, [
+        { t: '사용 가능한 명령어:', cls: 'text-muted' },
+        ...COMMANDS.filter((x) => x.cmd !== 'help').map((x) => ({
+          t: `  ${x.cmd.padEnd(24)} ${x.desc}`,
+          cls: 'text-slate-300',
+        })),
+        { t: '  (아래 칩을 클릭해도 실행됩니다 · ↑↓ 로 입력 기록 탐색)', cls: 'text-faint' },
+      ])
+      return
+    }
+    const out = []
+    if (c.out) c.out.forEach((o) => out.push({ t: o, cls: 'text-cyan' }))
+    if (c.all) out.push({ t: '→ 전체 섹션을 표시합니다.', cls: 'text-term' })
+    else if (c.section) out.push({ t: `→ ${c.section} 섹션을 표시합니다.`, cls: 'text-term' })
+    print(cmd, out)
+    if (c.all) onRevealAll()
+    else if (c.section) onReveal(c.section)
+  }
+
+  const onKey = (e) => {
+    if (e.key === 'Enter') {
+      run(input)
+      setInput('')
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault()
+      if (!history.length) return
+      const ni = hIdx < 0 ? history.length - 1 : Math.max(0, hIdx - 1)
+      setHIdx(ni)
+      setInput(history[ni])
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault()
+      if (hIdx < 0) return
+      const ni = hIdx + 1
+      if (ni >= history.length) {
+        setHIdx(-1)
+        setInput('')
+      } else {
+        setHIdx(ni)
+        setInput(history[ni])
+      }
+    }
+  }
+
+  return (
+    <div onClick={() => inputRef.current?.focus()} className="cursor-text">
+      {log.length > 0 && (
+        <div
+          ref={bodyRef}
+          className="mt-5 max-h-60 overflow-y-auto border-t border-line pt-4 font-mono text-[13px] leading-6 no-scrollbar"
+        >
+          {log.map((entry, i) => (
+            <div key={i} className="mb-2.5">
+              <div>
+                <span className="text-term">$</span> <span className="text-slate-200">{entry.prompt}</span>
+              </div>
+              {entry.lines.map((ln, j) => (
+                <div key={j} className={`whitespace-pre-wrap ${ln.cls}`}>
+                  {ln.t}
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
+      )}
+
+      <div className="mt-4 flex items-center font-mono text-sm">
+        <span className="text-term">$</span>
+        <input
+          ref={inputRef}
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={onKey}
+          spellCheck={false}
+          autoComplete="off"
+          aria-label="terminal command input"
+          placeholder="help"
+          className="ml-2 w-full bg-transparent text-slate-100 caret-term outline-none placeholder:text-faint"
+        />
+      </div>
+
+      <div className="mt-4 flex flex-wrap gap-2 font-mono text-[11px]">
+        {CHIPS.map((c) => (
+          <button
+            key={c}
+            onClick={(e) => { e.stopPropagation(); run(c) }}
+            className="rounded-md border border-line bg-surface2 px-2.5 py-1 text-muted transition hover:border-term hover:text-term"
+          >
+            {c}
+          </button>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function Hero({ onReveal, onRevealAll }) {
   const typed = useTypewriter(profile.summary, { speed: 28 })
   return (
     <header id="top" className="bg-grid">
@@ -126,9 +292,15 @@ function Hero() {
               {typed}
               <span className="ml-0.5 inline-block w-2 animate-blink text-term">▋</span>
             </p>
+
+            <div className="mt-5 text-faint">
+              # 장세존에 대해 더 알려드릴게요 — 명령어를 입력하거나 아래 칩을 눌러보세요. (<span className="text-term">help</span>)
+            </div>
           </div>
 
-          <div className="mt-7 flex flex-wrap gap-2.5 font-mono text-[13px]">
+          <Terminal onReveal={onReveal} onRevealAll={onRevealAll} />
+
+          <div className="mt-7 flex flex-wrap gap-2.5 border-t border-line pt-6 font-mono text-[13px]">
             <CopyBtn label="Gmail" value={profile.emails[0]} />
             <CopyBtn label="Naver" value={profile.emails[1]} />
             <LinkBtn href={profile.github}>GitHub</LinkBtn>
@@ -239,6 +411,12 @@ function Skills() {
 }
 
 /* ── experience ──────────────────────────────────────── */
+function fauxHash(s) {
+  let h = 0
+  for (let i = 0; i < s.length; i += 1) h = (h * 31 + s.charCodeAt(i)) >>> 0
+  return h.toString(16).padStart(7, '0').slice(0, 7)
+}
+
 function Experience() {
   return (
     <section id="experience" className="mx-auto max-w-5xl px-5 py-16">
@@ -246,17 +424,28 @@ function Experience() {
       <div className="flex flex-col gap-5">
         {experience.map((e, i) => (
           <Reveal key={e.org} delay={i * 0.05}>
-            <div className="rounded-xl border border-line bg-surface p-6">
+            <div className="rounded-xl border border-line bg-surface p-6 transition-colors duration-200 hover:border-term/40">
               <div className="flex flex-wrap items-baseline justify-between gap-2">
                 <h3 className="text-lg font-bold text-slate-100">{e.org}</h3>
                 <span className="font-mono text-xs text-cyan">{e.when}</span>
               </div>
               {e.note && <p className="mt-1 text-xs text-faint">{e.note}</p>}
-              <ul className="mt-4 flex flex-col gap-3">
+              <ul className="mt-4 flex flex-col gap-1.5">
                 {e.items.map(([head, body]) => (
-                  <li key={head} className="border-l-2 border-line pl-4">
-                    <div className="text-sm font-semibold text-slate-200">{head}</div>
-                    {body && <div className="mt-0.5 text-sm leading-relaxed text-muted">{body}</div>}
+                  <li
+                    key={head}
+                    className="group/item rounded-r-md border-l-2 border-line py-1.5 pl-4 transition-all duration-200 hover:border-term hover:bg-surface2/50"
+                  >
+                    <div className="flex items-baseline gap-2">
+                      <span className="font-mono text-xs text-faint transition-colors group-hover/item:text-term">●</span>
+                      <span className="text-sm font-semibold text-slate-200 transition-colors group-hover/item:text-term">
+                        {head}
+                      </span>
+                      <span className="ml-auto hidden shrink-0 font-mono text-[10px] text-faint opacity-0 transition-opacity duration-300 group-hover/item:opacity-100 sm:block">
+                        commit {fauxHash(head)}
+                      </span>
+                    </div>
+                    {body && <div className="mt-1 pl-5 text-sm leading-relaxed text-muted">{body}</div>}
                   </li>
                 ))}
               </ul>
@@ -414,17 +603,82 @@ function Toast() {
 }
 
 /* ── app ─────────────────────────────────────────────── */
+function useIsDesktop() {
+  const query = '(min-width: 768px)'
+  const get = () => (typeof window !== 'undefined' ? window.matchMedia(query).matches : true)
+  const [desktop, setDesktop] = useState(get)
+  useEffect(() => {
+    const mq = window.matchMedia(query)
+    const handler = () => setDesktop(mq.matches)
+    mq.addEventListener('change', handler)
+    return () => mq.removeEventListener('change', handler)
+  }, [])
+  return desktop
+}
+
+function DesktopHint() {
+  return (
+    <div className="mx-auto max-w-5xl px-5 py-28 text-center">
+      <motion.p
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.3, duration: 0.6 }}
+        className="font-mono text-sm text-faint"
+      >
+        ↑ 위 터미널에서 명령어를 실행하거나 칩을 클릭하면 내용이 여기에 나타납니다.
+      </motion.p>
+      <p className="mt-3 font-mono text-xs text-faint/70">
+        예: <span className="text-term">cat about/strengths.md</span> · <span className="text-term">ls projects/</span> ·{' '}
+        <span className="text-term">cat resume.md</span> (전체)
+      </p>
+    </div>
+  )
+}
+
 export default function App() {
+  const isDesktop = useIsDesktop()
+  const [revealed, setRevealed] = useState(() => new Set())
+  const [pending, setPending] = useState(null)
+
+  const reveal = (id) => {
+    if (!isDesktop) {
+      flashSection(id)
+      return
+    }
+    setRevealed((s) => (s.has(id) ? s : new Set(s).add(id)))
+    setPending(id)
+  }
+  const revealAll = () => {
+    if (!isDesktop) {
+      flashSection('about')
+      return
+    }
+    setRevealed(new Set(SECTION_IDS))
+    setPending('about')
+  }
+
+  useEffect(() => {
+    if (!pending) return
+    const t = setTimeout(() => {
+      flashSection(pending)
+      setPending(null)
+    }, 90)
+    return () => clearTimeout(t)
+  }, [pending, revealed])
+
+  const show = (id) => !isDesktop || revealed.has(id)
+
   return (
     <div className="min-h-screen">
-      <Nav />
-      <Hero />
+      <Nav onReveal={reveal} />
+      <Hero onReveal={reveal} onRevealAll={revealAll} />
       <main>
-        <About />
-        <Skills />
-        <Experience />
-        <Projects />
-        <Education />
+        {isDesktop && revealed.size === 0 && <DesktopHint />}
+        {show('about') && <About />}
+        {show('skills') && <Skills />}
+        {show('experience') && <Experience />}
+        {show('projects') && <Projects />}
+        {show('education') && <Education />}
       </main>
       <Footer />
       <Toast />
