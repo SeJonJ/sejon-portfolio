@@ -129,7 +129,7 @@ function Hero() {
           </div>
 
           <div className="mt-7 flex flex-wrap gap-2.5 font-mono text-[13px]">
-            <CopyBtn label="Gmail" value={profile.emails[0]} primary />
+            <CopyBtn label="Gmail" value={profile.emails[0]} />
             <CopyBtn label="Naver" value={profile.emails[1]} />
             <LinkBtn href={profile.github}>GitHub</LinkBtn>
             <LinkBtn href={profile.blog}>Blog</LinkBtn>
