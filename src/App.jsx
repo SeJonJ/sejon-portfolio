@@ -89,7 +89,7 @@ const NAV = [
   ['projects', 'projects'],
   ['education', 'edu'],
 ]
-function Nav({ onReveal }) {
+function Nav({ onReveal, onRevealAll }) {
   return (
     <nav className="sticky top-0 z-50 border-b border-line bg-bg/80 backdrop-blur">
       <div className="mx-auto flex max-w-5xl items-center justify-between px-5 py-3">
@@ -113,6 +113,13 @@ function Nav({ onReveal }) {
               </li>
             ))}
           </ul>
+          <button
+            onClick={onRevealAll}
+            title="모든 섹션을 한 번에 펼칩니다 (cat resume.md)"
+            className="hidden items-center gap-1.5 rounded-md border border-line bg-surface2 px-3 py-1.5 font-mono text-[13px] text-muted transition hover:-translate-y-0.5 hover:border-term hover:text-term sm:flex"
+          >
+            <span aria-hidden>⊞</span> 전체 보기
+          </button>
           <PdfButton />
         </div>
       </div>
@@ -459,25 +466,36 @@ function Experience() {
                 <span className="font-mono text-xs text-cyan">{e.when}</span>
               </div>
               {e.note && <p className="mt-1 text-xs text-faint">{e.note}</p>}
-              <ul className="mt-4 flex flex-col gap-1.5">
-                {e.items.map(([head, body]) => (
-                  <li
-                    key={head}
-                    className="group/item rounded-r-md border-l-2 border-line py-1.5 pl-4 transition-all duration-200 hover:border-term hover:bg-surface2/50"
+              <div className="mt-5 flex flex-col gap-5">
+                {e.roles.map((r) => (
+                  <div
+                    key={r.title + r.period}
+                    className="group/role rounded-r-md border-l-2 border-line pl-4 transition-colors duration-200 hover:border-term"
                   >
-                    <div className="flex items-baseline gap-2">
-                      <span className="font-mono text-xs text-faint transition-colors group-hover/item:text-term">●</span>
-                      <span className="text-sm font-semibold text-slate-200 transition-colors group-hover/item:text-term">
-                        {head}
+                    <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+                      {r.org && <span className="font-mono text-[11px] text-faint">[{r.org}]</span>}
+                      <span className="text-[15px] font-semibold text-slate-100 transition-colors group-hover/role:text-term">
+                        {r.title}
                       </span>
-                      <span className="ml-auto hidden shrink-0 font-mono text-[10px] text-faint opacity-0 transition-opacity duration-300 group-hover/item:opacity-100 sm:block">
-                        commit {fauxHash(head)}
+                      {r.period && <span className="font-mono text-xs text-cyan">· {r.period}</span>}
+                      <span className="ml-auto hidden shrink-0 font-mono text-[10px] text-faint opacity-0 transition-opacity duration-300 group-hover/role:opacity-100 sm:block">
+                        commit {fauxHash(r.title + r.period)}
                       </span>
                     </div>
-                    {body && <div className="mt-1 pl-5 text-sm leading-relaxed text-muted">{body}</div>}
-                  </li>
+                    {r.summary && <p className="mt-1 text-sm text-slate-300">{r.summary}</p>}
+                    {r.points.length > 0 && (
+                      <ul className="mt-2 flex flex-col gap-1">
+                        {r.points.map((p) => (
+                          <li key={p} className="flex gap-2 text-sm leading-relaxed text-muted">
+                            <span className="mt-1.5 h-1 w-1 shrink-0 rounded-sm bg-term/60" />
+                            <span>{p}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
                 ))}
-              </ul>
+              </div>
             </div>
           </Reveal>
         ))}
@@ -649,6 +667,7 @@ function PrintResume() {
           </div>
         </div>
         <p className="pr-summary">{profile.summary}</p>
+        <p className="pr-bridge">{profile.bridge}</p>
       </header>
 
       <section className="pr-sec">
@@ -695,14 +714,27 @@ function PrintResume() {
               <span className="pr-when">{e.when}</span>
             </div>
             {e.note && <div className="pr-note">{e.note}</div>}
-            <ul>
-              {e.items.map(([head, body]) => (
-                <li key={head}>
-                  <b>{head}</b>
-                  {body && <span className="pr-body"> — {body}</span>}
-                </li>
+            <div className="pr-roles">
+              {e.roles.map((r) => (
+                <div key={r.title + r.period} className="pr-role">
+                  <div className="pr-role-head">
+                    <b>
+                      {r.org ? `[${r.org}] ` : ''}
+                      {r.title}
+                    </b>
+                    {r.period && <span className="pr-role-period">{r.period}</span>}
+                  </div>
+                  {r.summary && <div className="pr-role-summary">{r.summary}</div>}
+                  {r.points.length > 0 && (
+                    <ul>
+                      {r.points.map((p) => (
+                        <li key={p}>{p}</li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
               ))}
-            </ul>
+            </div>
           </div>
         ))}
       </section>
@@ -837,7 +869,7 @@ export default function App() {
   return (
     <>
       <div className="screen-root min-h-screen">
-        <Nav onReveal={reveal} />
+        <Nav onReveal={reveal} onRevealAll={revealAll} />
         <Hero onReveal={reveal} onRevealAll={revealAll} />
         <main>
           {isDesktop && revealed.size === 0 && <DesktopHint />}

@@ -128,6 +128,12 @@ section[id] {
     letter-spacing: -0.01em;
     color: #374151;
   }
+  .pr-bridge {
+    margin: 5px 0 0;
+    max-width: 52em;
+    color: #4b5563;
+    line-height: 1.55;
+  }
   .pr-contact {
     text-align: right;
     font-size: 9.5px;
@@ -238,17 +244,53 @@ section[id] {
     color: #6b7280;
     margin-top: 3px;
   }
+  /* experience roles (요약 + 임팩트 불릿) */
+  .pr-roles {
+    margin-top: 9px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .pr-role {
+    break-inside: avoid;
+  }
+  .pr-role-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 10px;
+  }
+  .pr-role-head b {
+    font-size: 11px;
+  }
+  .pr-role-period {
+    font-size: 9px;
+    color: #166534;
+    white-space: nowrap;
+  }
+  .pr-role-summary {
+    margin-top: 2px;
+    color: #1f2937;
+    font-size: 10px;
+  }
+  .pr-role ul {
+    margin: 4px 0 0;
+    padding-left: 14px;
+  }
+  .pr-role li {
+    margin: 2px 0;
+    color: #4b5563;
+    line-height: 1.5;
+  }
   .pr-one {
     color: #166534;
     font-style: italic;
     margin-top: 2px;
   }
-  .pr-exp ul,
   .pr-proj ul {
     margin: 7px 0 0;
     padding-left: 15px;
   }
-  .pr-exp li,
   .pr-proj li {
     margin: 5px 0;
     line-height: 1.58;
