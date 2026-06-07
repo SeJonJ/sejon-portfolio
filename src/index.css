@@ -51,3 +51,230 @@ section[id] {
     background-color: rgba(74, 222, 128, 0);
   }
 }
+
+/* ── PDF / print resume ─────────────────────────────────
+   화면에서는 숨기고, 인쇄(PDF 저장) 시에만 터미널 테마를 벗은
+   깔끔한 라이트 레이아웃으로 전체 내용을 출력한다. */
+.print-resume {
+  display: none;
+}
+
+@media print {
+  /* 화면 UI 전체 숨김, 이력서 레이아웃만 노출 */
+  .screen-root {
+    display: none !important;
+  }
+  .print-resume {
+    display: block !important;
+  }
+
+  html,
+  body {
+    background: #ffffff !important;
+    color: #1f2937 !important;
+  }
+
+  /* margin: 0 으로 두면 브라우저가 자동 삽입하는 머리글/바닥글
+     (문서 제목·날짜·URL·페이지번호)이 출력 공간을 잃어 사라진다.
+     실제 인쇄 여백은 .print-resume 의 padding 으로 대체한다. */
+  @page {
+    size: A4;
+    margin: 0;
+  }
+
+  .print-resume {
+    padding: 13mm 11mm;
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+    color: #1f2937;
+    font-size: 10.4px;
+    line-height: 1.62;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .print-resume b {
+    font-weight: 700;
+    color: #111827;
+  }
+
+  /* header */
+  .pr-head {
+    padding-bottom: 12px;
+    margin-bottom: 16px;
+    border-bottom: 2px solid #166534;
+  }
+  .pr-head-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 18px;
+  }
+  .pr-id h1 {
+    font-size: 24px;
+    font-weight: 800;
+    color: #111827;
+    margin: 0;
+  }
+  .pr-role {
+    font-size: 11px;
+    color: #166534;
+    font-weight: 600;
+    margin-top: 2px;
+  }
+  .pr-summary {
+    margin: 10px 0 0;
+    max-width: none;
+    white-space: nowrap;
+    letter-spacing: -0.01em;
+    color: #374151;
+  }
+  .pr-contact {
+    text-align: right;
+    font-size: 9.5px;
+    color: #4b5563;
+    line-height: 1.7;
+    white-space: nowrap;
+  }
+
+  /* section */
+  .pr-sec {
+    margin-top: 30px;
+  }
+  .pr-sec h2 {
+    font-size: 13px;
+    font-weight: 700;
+    color: #166534;
+    border-bottom: 1px solid #d1d5db;
+    padding-bottom: 3px;
+    margin: 0 0 11px;
+    break-after: avoid;
+  }
+
+  .pr-grid2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .pr-card {
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    padding: 8px 10px;
+    break-inside: avoid;
+  }
+  .pr-card b {
+    color: #166534;
+  }
+  .pr-card p {
+    margin: 4px 0 0;
+    color: #374151;
+  }
+  .pr-card ul {
+    margin: 5px 0 0;
+    padding-left: 14px;
+  }
+  .pr-card li {
+    margin: 2px 0;
+  }
+
+  /* skills */
+  .pr-skills {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .pr-skill-row {
+    display: flex;
+    gap: 8px;
+    break-inside: avoid;
+  }
+  .pr-skill-group {
+    flex: 0 0 110px;
+    font-weight: 700;
+    color: #111827;
+    font-size: 9.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+  .pr-skill-items {
+    color: #374151;
+  }
+  .pr-lvl {
+    margin-left: 3px;
+    font-size: 8px;
+    letter-spacing: -1px;
+  }
+  .pr-lvl .on {
+    color: #166534;
+  }
+  .pr-lvl .off {
+    color: #cbd5e1;
+  }
+  .pr-dot {
+    color: #9ca3af;
+  }
+
+  /* experience / projects */
+  .pr-exp,
+  .pr-proj {
+    margin-bottom: 15px;
+    break-inside: avoid;
+  }
+  .pr-exp-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 10px;
+  }
+  .pr-exp-head b {
+    font-size: 12px;
+  }
+  .pr-when {
+    font-size: 9.5px;
+    color: #166534;
+    white-space: nowrap;
+  }
+  .pr-note {
+    font-size: 9.5px;
+    color: #6b7280;
+    margin-top: 3px;
+  }
+  .pr-one {
+    color: #166534;
+    font-style: italic;
+    margin-top: 2px;
+  }
+  .pr-exp ul,
+  .pr-proj ul {
+    margin: 7px 0 0;
+    padding-left: 15px;
+  }
+  .pr-exp li,
+  .pr-proj li {
+    margin: 5px 0;
+    line-height: 1.58;
+  }
+  .pr-body {
+    color: #374151;
+  }
+  .pr-trouble {
+    margin-top: 6px;
+    border: 1px solid #e5e7eb;
+    background: #f9fafb;
+    border-radius: 6px;
+    padding: 6px 9px;
+  }
+  .pr-trouble > b {
+    font-size: 9px;
+    letter-spacing: 0.05em;
+    color: #b45309;
+  }
+  .pr-trouble ul {
+    margin: 4px 0 0;
+    padding-left: 15px;
+  }
+  .pr-stack {
+    margin-top: 6px;
+    font-size: 9px;
+    color: #6b7280;
+  }
+}

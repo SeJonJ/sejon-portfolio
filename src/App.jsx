@@ -55,6 +55,32 @@ const Window = ({ title, children, className = '' }) => (
   </div>
 )
 
+/* ── pdf export ──────────────────────────────────────── */
+// 터미널 테마를 제외한 깔끔한 이력서 레이아웃(.print-resume)을 브라우저
+// 인쇄 기능으로 PDF 저장. 저장 시 기본 파일명이 되도록 document.title 을 잠시 바꾼다.
+function triggerPdf() {
+  const prev = document.title
+  document.title = '장세존_백엔드_이력서'
+  const restore = () => {
+    document.title = prev
+    window.removeEventListener('afterprint', restore)
+  }
+  window.addEventListener('afterprint', restore)
+  window.print()
+}
+
+function PdfButton({ className = '' }) {
+  return (
+    <button
+      onClick={triggerPdf}
+      title="이력서를 PDF로 저장합니다"
+      className={`flex items-center gap-1.5 rounded-md border border-term/40 bg-term/10 px-3 py-1.5 font-mono text-[13px] text-term transition hover:-translate-y-0.5 hover:border-term ${className}`}
+    >
+      <span aria-hidden>⤓</span> PDF
+    </button>
+  )
+}
+
 /* ── nav ─────────────────────────────────────────────── */
 const NAV = [
   ['about', 'about'],
@@ -70,22 +96,25 @@ function Nav({ onReveal }) {
         <a href="#top" className="font-mono text-sm font-bold">
           <span className="text-term">~/</span>sejon
         </a>
-        <ul className="hidden gap-1 font-mono text-[13px] sm:flex">
-          {NAV.map(([id, label]) => (
-            <li key={id}>
-              <a
-                href={`#${id}`}
-                onClick={(e) => {
-                  e.preventDefault()
-                  onReveal(id)
-                }}
-                className="rounded-md px-3 py-1.5 text-muted transition hover:bg-surface hover:text-term"
-              >
-                {label}
-              </a>
-            </li>
-          ))}
-        </ul>
+        <div className="flex items-center gap-2">
+          <ul className="hidden gap-1 font-mono text-[13px] sm:flex">
+            {NAV.map(([id, label]) => (
+              <li key={id}>
+                <a
+                  href={`#${id}`}
+                  onClick={(e) => {
+                    e.preventDefault()
+                    onReveal(id)
+                  }}
+                  className="rounded-md px-3 py-1.5 text-muted transition hover:bg-surface hover:text-term"
+                >
+                  {label}
+                </a>
+              </li>
+            ))}
+          </ul>
+          <PdfButton />
+        </div>
       </div>
     </nav>
   )
@@ -602,6 +631,143 @@ function Toast() {
   )
 }
 
+/* ── print / pdf resume (terminal theme 제외, 내용 동일) ── */
+function PrintResume() {
+  return (
+    <div className="print-resume" aria-hidden>
+      <header className="pr-head">
+        <div className="pr-head-top">
+          <div className="pr-id">
+            <h1>{profile.name}</h1>
+            <div className="pr-role">{profile.role}</div>
+          </div>
+          <div className="pr-contact">
+            <div>{profile.emails[0]}</div>
+            <div>{profile.emails[1]}</div>
+            <div>{profile.github.replace('https://', '')}</div>
+            <div>{profile.blog.replace('https://', '')}</div>
+          </div>
+        </div>
+        <p className="pr-summary">{profile.summary}</p>
+      </header>
+
+      <section className="pr-sec">
+        <h2>핵심 역량</h2>
+        <div className="pr-grid2">
+          {strengths.map((s) => (
+            <div key={s.t} className="pr-card">
+              <b>{s.t}</b>
+              <p>{s.d}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="pr-sec">
+        <h2>보유 기술</h2>
+        <div className="pr-skills">
+          {skills.map((g) => (
+            <div key={g.group} className="pr-skill-row">
+              <span className="pr-skill-group">{g.group}</span>
+              <span className="pr-skill-items">
+                {g.items.map(([name, lvl], i) => (
+                  <span key={name} className="pr-skill">
+                    {name}
+                    <span className="pr-lvl">
+                      <span className="on">{'▰'.repeat(lvl)}</span>
+                      <span className="off">{'▰'.repeat(3 - lvl)}</span>
+                    </span>
+                    {i < g.items.length - 1 ? <span className="pr-dot"> · </span> : null}
+                  </span>
+                ))}
+              </span>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="pr-sec">
+        <h2>경력</h2>
+        {experience.map((e) => (
+          <div key={e.org} className="pr-exp">
+            <div className="pr-exp-head">
+              <b>{e.org}</b>
+              <span className="pr-when">{e.when}</span>
+            </div>
+            {e.note && <div className="pr-note">{e.note}</div>}
+            <ul>
+              {e.items.map(([head, body]) => (
+                <li key={head}>
+                  <b>{head}</b>
+                  {body && <span className="pr-body"> — {body}</span>}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </section>
+
+      <section className="pr-sec">
+        <h2>프로젝트</h2>
+        {projects.map((p) => (
+          <div key={p.name} className="pr-proj">
+            <div className="pr-exp-head">
+              <b>{p.name}</b>
+              <span className="pr-when">{p.meta.join(' · ')}</span>
+            </div>
+            <div className="pr-one">{p.one}</div>
+            <p className="pr-body">{p.desc}</p>
+            {p.feats.length > 0 && (
+              <ul>
+                {p.feats.map(([t, d]) => (
+                  <li key={t}>
+                    <b>{t}</b> — {d}
+                  </li>
+                ))}
+              </ul>
+            )}
+            {p.troubles?.length > 0 && (
+              <div className="pr-trouble">
+                <b>TROUBLESHOOTING</b>
+                <ul>
+                  {p.troubles.map(([t, d]) => (
+                    <li key={t}>
+                      <b>{t}</b> — {d}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            <div className="pr-stack">{p.stack.join('  ·  ')}</div>
+          </div>
+        ))}
+      </section>
+
+      <section className="pr-sec">
+        <h2>학력 &amp; 자격</h2>
+        <div className="pr-grid2">
+          <div className="pr-card">
+            <b>학력 / 교육</b>
+            <ul>
+              {education.edu.map((x) => (
+                <li key={x}>{x}</li>
+              ))}
+            </ul>
+          </div>
+          <div className="pr-card">
+            <b>자격증</b>
+            <ul>
+              {education.cert.map((x) => (
+                <li key={x}>{x}</li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </section>
+    </div>
+  )
+}
+
 /* ── app ─────────────────────────────────────────────── */
 function useIsDesktop() {
   const query = '(min-width: 768px)'
@@ -669,19 +835,22 @@ export default function App() {
   const show = (id) => !isDesktop || revealed.has(id)
 
   return (
-    <div className="min-h-screen">
-      <Nav onReveal={reveal} />
-      <Hero onReveal={reveal} onRevealAll={revealAll} />
-      <main>
-        {isDesktop && revealed.size === 0 && <DesktopHint />}
-        {show('about') && <About />}
-        {show('skills') && <Skills />}
-        {show('experience') && <Experience />}
-        {show('projects') && <Projects />}
-        {show('education') && <Education />}
-      </main>
-      <Footer />
-      <Toast />
-    </div>
+    <>
+      <div className="screen-root min-h-screen">
+        <Nav onReveal={reveal} />
+        <Hero onReveal={reveal} onRevealAll={revealAll} />
+        <main>
+          {isDesktop && revealed.size === 0 && <DesktopHint />}
+          {show('about') && <About />}
+          {show('skills') && <Skills />}
+          {show('experience') && <Experience />}
+          {show('projects') && <Projects />}
+          {show('education') && <Education />}
+        </main>
+        <Footer />
+        <Toast />
+      </div>
+      <PrintResume />
+    </>
   )
 }
