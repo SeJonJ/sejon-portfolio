@@ -136,6 +136,21 @@ export const projects = [
     stack: ['Spring Boot', 'WebRTC', 'Kurento', 'Redis', 'Kafka', 'MinIO', 'K8s(EKS)', 'Docker'],
   },
   {
+    name: 'SAGE',
+    one: 'AI 코딩 에이전트 거버넌스·검증 하네스',
+    meta: ['2025 ~ 현재', '개인 프로젝트 · 설계 / 구현 / 검증'],
+    link: '',
+    repo: 'https://github.com/SeJonJ/SAGE',
+    desc: 'AI 코딩 에이전트가 고위험 변경의 계획·검증 단계를 건너뛰거나 생성 산출물이 drift되는 문제를 줄이기 위해 개발한 Python 기반 거버넌스 하네스.',
+    feats: [
+      ['Spec 기반 설정 생성·검증', 'Hook·agent·skill 설정을 단일 spec에서 생성하고, 생성물과 spec의 drift를 검증.'],
+      ['위험도·PDCA 게이트', '고위험 변경의 계획 문서와 단계 전환 조건을 검증해 누락 시 실행을 차단.'],
+      ['AI 품질 검증 자동화', 'Claude Code·Codex 양쪽 runtime을 지원하고, hook 회귀 테스트와 CI로 동작을 검증.'],
+    ],
+    troubles: [],
+    stack: ['Python', 'JSON Schema', 'Bash', 'GitHub Actions', 'Claude Code', 'Codex'],
+  },
+  {
     name: 'Kokeetea 매출 관리·분석',
     one: '프랜차이즈 매출 관리 + Python 매출 분석·예측',
     meta: ['2022.11', '4인 · 팀장'],
